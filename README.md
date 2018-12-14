@@ -1,4 +1,4 @@
-# Supplementary materials of the article "The Emergence of Primates Calls"
+# Supplementary material of the article entitled "The Emergence of Primate Calls"
 
 Data :
 - primate_alarm.csv
