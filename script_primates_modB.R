@@ -1,210 +1,265 @@
 library(ape)
 library(mgcv)
+library(MCMCpack)
+library(MASS)
 
+
+#######################
+### DATA PARAMETERS ###
+#######################
+
+# Phylogenetic tree of the species
 tree = read.tree("primates.tre")
+
+# Semantic tree of the repertoire
 sem = read.tree("semantic.tre")
 
-args <- commandArgs(TRUE)
-index_set = as.numeric(args[1])
-nb.call.root = 1
+#####################################
+### REPETITION OF THE SIMULATIONS ###
+#####################################
 
 n_rep = 40000
 
 for (rep in 1:n_rep)
 {
-
-	# Esp 1/10E6  
-	# exp -lamba*10E6 = 1/2
+	
+	########################
+	### PRIOR PARAMETERS ###
+	########################
+	
+	# Birth rate
 	lambda = rgamma(1, 0.2)
-	# delta => mu / 1/5 lambda (si 5 traits) 
+	
+	# Death rate
 	delta = lambda * rlnorm(1, 0)
 
-	# Initialisation of the languages
-	language = matrix(0,nb.call.root,length(sem$edge[,2]) + 1)
 
-	leaves = c()
-
-	tree$node.names = c(tree$tip.label, tree$node.label)
-	# Root
-	root.label = length(tree$tip.label) + 1
-
-	# Start is the vector of the children of the Root
-	start <- which(tree$edge[, 1] == root.label)
-
-	# Start.stock is the vector of the nodes, growing in the loop
-	start.stock = c()
-	start.stock = c(start.stock, start)
-
-	index.stock = c()
-
-	# traits is the list of the evolving characters
-	traits = list()
-
-	l = 0
-
-	i = -1
-
-	# Loop walking along the tree of the species/languages
-	while (length(start.stock) > 0)
-	{	
-		i = i + 1
-
-		if (i > 0)
-		{
-			# Index is the next Node used
-			index = start.stock[1]
-			index.stock = c(index.stock, index)
-
-			# Start is the vector of the children of the Node
-			start = which(tree$edge[, 1] == tree$edge[index, 2])
-			start.stock = c(start.stock, start)
-
-			if(length(start) == 0)
-			{
-				leaves = c(leaves, i)
-			}
-		}
-
-
-		while(length(start > 0))
-		{
-			l = l + 1
-
-			# Transmission of the trait from the parent node to the children
-			if (i == 0)
-			{
-				traits[[l]] = language
-				wait.time = 1
-			}
-			else
-			{
-				traits[[l]] = traits[[i]]
-				wait.time = tree$edge.length[index.stock[i]]*1000
-			}
-
-			time = 0
-			
-			while (time < wait.time)
-			{
-				
-				mat.new.words = c()
-				vect.wait.time = c()
+	###################################################
+	### INITIALISATION OF THE SIMULATION PARAMETERS ###
+	###################################################
 	
-				tree.language = sem
-				tree.language$node.names = c(tree.language$tip.label, tree.language$node.label)
+	# Initialisation
+	nb.call.root = 1
+	traits = c()
+	traits[[1]] = matrix(0,nb.call.root,length(sem$edge[,2]) + 1)
+	
+	tips = c()
+	tips2 = c()
+	nodes = c()
+	
+
+	# Vector of the nodes growing during the loop
+	node.stock = 0
+
+	# Index of the current node
+	i = 1
+	
+	# Index of the children nodes
+	l = 1
+	
+	########################################
+	### LOOP OF EVOLUTION ALONG THE TREE ###
+	########################################
+	
+	while (length(node.stock) > 0)
+	{		
+		################################
+		### EVOLUTION ALONG A BRANCH ###
+		################################
+ 		
+		if (i > 1)
+		{ 
+			# Length of the branch 
+			wait.time = tree$edge.length[node.stock[1]]*1000
+		}
+		else 
+		{ 
+			# Time for an ancestral equilibrium
+			wait.time = 1000
+		}
 		
-				# Root of the semantic tree
-				root.label.language = length(tree.language$tip.label) + 1
-
-				# Start is the vector of the children of the Root
-				start.language <- which(tree.language$edge[, 1] == root.label.language)
-
-				# Start.stock is the vector of the nodes, growing in the loop
-				start.language.stock = c()
-				start.language.stock = c(start.language.stock, start.language)
-
-				index.language.stock = c()
-
-				# The root may appear
+		time = 0
 		
-				new.word = traits[[l]][1,]
-				new.word[length(tree.language$tip.label) + 1] = 1
-				mat.new.words = rbind(mat.new.words, new.word)
-				vect.wait.time = c(vect.wait.time, rexp(1,lambda))
+		while (time < wait.time)
+		{							
 			
-				vect.index.word = c()
-				vect.index.word = c(vect.index.word, 0)
+			#########################################
+			### CONSTRUCTION OF THE SEMANTIC TREE ###	
+			#########################################
+							
+			mat.new.words = c()
+			vect.wait.time = c()
+
+			tree.language = sem
+			tree.language$node.names = c(tree.language$tip.label, tree.language$node.label)
+	
+			# Root of the semantic tree
+			root.label.language = length(tree.language$tip.label) + 1
+
+			# Start is the vector of the children of the Root
+			start.language <- which(tree.language$edge[, 1] == root.label.language)
+
+			# Start.stock is the vector of the nodes, growing in the loop
+			start.language.stock = c()
+			start.language.stock = c(start.language.stock, start.language)
+
+			index.language.stock = c()
+
+
+			################################
+			### APPARITION OF THE ROOT ? ###
+			################################
+			
+			new.word = traits[[i]][1,]
+			new.word[length(tree.language$tip.label) + 1] = 1
+			mat.new.words = rbind(mat.new.words, new.word)
+			vect.wait.time = c(vect.wait.time, rexp(1,lambda))
+			
+			vect.index.word = c()
+			vect.index.word = c(vect.index.word, 0)
+			c = length(start.language)
+			p = 1
+			while (c > 0)
+			{
+				c = c - 1
+				vect.index.word = c(vect.index.word, p)
+			}	
+		
+			##############################
+			### APPARITION OF A WORD ? ###
+			##############################
+			
+			while (length(start.language.stock) > 0)
+			{	
+				p = p + 1
+
+				# Index is the next Node used
+				index.language = start.language.stock[1]
+				index.language.stock = c(index.language.stock, index.language)
+
+				# Start is the vector of the children of the Node
+				start.language = which(tree.language$edge[, 1] == tree.language$edge[index.language, 2])
+
 				c = length(start.language)
-				p = 1
 				while (c > 0)
 				{
 					c = c - 1
 					vect.index.word = c(vect.index.word, p)
-				}	
+				}
 			
-				# Loop walking along the semantic tree
-				while (length(start.language.stock) > 0)
-				{	
-					p = p + 1
-
-					# Index is the next Node used
-					index.language = start.language.stock[1]
-					index.language.stock = c(index.language.stock, index.language)
-
-					# Start is the vector of the children of the Node
-					start.language = which(tree.language$edge[, 1] == tree.language$edge[index.language, 2])
-
-					c = length(start.language)
-					while (c > 0)
-					{
-						c = c - 1
-						vect.index.word = c(vect.index.word, p)
-					}
+				if (length(which(apply(traits[[i]], 1, function(x) identical(x, mat.new.words[vect.index.word[p],])))) > 0)
+				{
+					new.word = mat.new.words[vect.index.word[p],]
+					new.word[tree.language$edge[index.language, 2]] = 1
+					mat.new.words = rbind(mat.new.words, new.word)
+					vect.wait.time = c(vect.wait.time, rexp(1,lambda))
 				
-					if (length(which(apply(traits[[l]], 1, function(x) identical(x, mat.new.words[vect.index.word[p],])))) > 0)
-					{
-						new.word = mat.new.words[vect.index.word[p],]
-						new.word[tree.language$edge[index.language, 2]] = 1
-						mat.new.words = rbind(mat.new.words, new.word)
-						vect.wait.time = c(vect.wait.time, rexp(1,lambda))
-				
-						start.language.stock = c(start.language.stock, start.language)
-					}
-
+					start.language.stock = c(start.language.stock, start.language)	
+				}
+							
 				start.language.stock = start.language.stock[-1]
-
-				}
-
-				nb.words = dim(traits[[l]])[1]
-
-				# A word may disappear ?
-				if (nb.words > 1)
-				{
-					for (j in 1:(nb.words-1))
-					{
-						mat.new.words = rbind(mat.new.words, matrix(-1,1,length(sem$node.label) + length(sem$tip.label)))
-						vect.wait.time = c(vect.wait.time, rexp( 1 , delta) )
-					}
-				}
-
-				# Event
-				index.event = which(vect.wait.time == min(vect.wait.time))
-			
-				if ((time + min(vect.wait.time)) < wait.time)
-				{
-					if (mat.new.words[index.event,1] == -1)
-					{
-						traits[[l]] = traits[[l]][-(index.event - (dim(mat.new.words)[1] - nb.words)),, drop = FALSE]
-					}
-					else
-					{
-						traits[[l]] = rbind(traits[[l]], mat.new.words[index.event,])
-						traits[[l]] = uniquecombs(traits[[l]])
-					}
-				}
-				nb.words = dim(traits[[l]])[1]
-		
-				time = time + min(vect.wait.time)
-		
+				
 			}
-	
 
-			start = start[-1]
-		}
+			nb.words = dim(traits[[i]])[1]
+
+
+			################################
+			### DISAPPARTION OF A WORD ? ###
+			################################
+			
+			if (nb.words > 1)
+			{
+				for (j in 1:(nb.words-1))
+				{
+					mat.new.words = rbind(mat.new.words, matrix(-1,1,length(sem$node.label) + length(sem$tip.label)))
+					vect.wait.time = c(vect.wait.time, rexp( 1 , delta) )
+				}
+			}
+
+			# Event
+			index.event = which(vect.wait.time == min(vect.wait.time))
+		
+			if ((time + min(vect.wait.time)) < wait.time)
+			{
+				if (mat.new.words[index.event,1] == -1)
+				{
+					traits[[i]] = traits[[i]][-(index.event - (dim(mat.new.words)[1] - nb.words)),, drop = FALSE]
+				}
+				else
+				{
+					traits[[i]] = rbind(traits[[i]], mat.new.words[index.event,])
+					traits[[i]] = uniquecombs(traits[[i]])
+				}
+			}
+			nb.words = dim(traits[[i]])[1]
 	
-		if (i > 0)
+			time = time + min(vect.wait.time)
+			
+		}
+		
+		
+		####################################
+		### RECUPERATION OF THE CHILDREN ###
+		####################################
+		
+		if (i > 1)
+		{			
+			# Node is the vector of the children of the node
+			node = which(tree$edge[, 1] == tree$edge[node.stock[1], 2])
+						
+			if (length(node) < 1 )
+			{
+				tips = c(tips, tree$edge[node.stock[1],2])
+				tips2 = c(tips2, i)
+				nodes = c(nodes, tree$tip.label[tree$edge[node.stock[1],2]])
+			}
+			
+			node.stock = c(node.stock, node)
+		}
+		else
 		{
-			start.stock	= start.stock[-1]
-		}
-	}
+			# Root
+			root.label = length(tree$tip.label) + 1
 
+			# Vector of the children of the root
+			node <- which(tree$edge[, 1] == root.label)
+			node.stock = c(node.stock, node)
+		}
+
+		
+		#############################
+		### BRANCHING OF THE TREE ###
+		#############################
+	
+		while(length(node) > 0)
+		{
+			l = l + 1
+			
+			# Transmission from the parent to the child node
+			traits[[l]] = traits[[i]]
+			
+			node = node[-1]			
+		}
+		
+	
+		node.stock = node.stock[-1]
+		
+		i = i + 1
+		
+	}
+	
+	#############################
+	### WRITING OF THE OUTPUT ###
+	#############################
+	
 	traits_out = list()
-	for (i in 1:length(leaves))
+	for (i in 1:length(tips2))
 	{
-		traits_out[[i]] = traits[[leaves[i]]]
+		traits_out[[i]] = traits[[ tips2[ tips == i ] ]]
 	} 
 	#Writing of the output
-	dput(traits_out, paste(paste('primates_output_', (index_set - 1)*n_rep + rep , sep = ""),'.csv', sep = "") ) 
+	dput(traits_out, paste(paste('primates_output_', rep , sep = ""),'.csv', sep = "") ) 
 
 }
 
