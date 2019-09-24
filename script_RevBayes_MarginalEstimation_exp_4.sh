@@ -1,6 +1,6 @@
 #!/bin/bash
 
-calls="food"
+calls="alarm"
 
 # Generating the Q matrix using R
 Rscript script_write_matrix_sig_cat.R $calls 
@@ -23,13 +23,13 @@ echo '# Automatically generated mcmc_primates file for RevBayes' > mcmc_primates
 echo 'monitors = VectorMonitors()' >> mcmc_primates_tmp.Rev
 echo 'moves    = VectorMoves()' >> mcmc_primates_tmp.Rev
 
-echo "mu13 ~ dnExponential( 2.0 )" >> mcmc_primates_tmp.Rev
+echo "mu13 ~ dnExponential( 10.0 )" >> mcmc_primates_tmp.Rev
 echo "mu13.setValue( 0.1 )" >> mcmc_primates_tmp.Rev
 
-echo "mu99 ~ dnExponential( 2.0 )" >> mcmc_primates_tmp.Rev
+echo "mu99 ~ dnExponential( 10.0 )" >> mcmc_primates_tmp.Rev
 echo "mu99.setValue( 0.1 )" >> mcmc_primates_tmp.Rev
 
-echo "mu_0 ~ dnExponential( 2.0 )" >> mcmc_primates_tmp.Rev
+echo "mu_0 ~ dnExponential( 10.0 )" >> mcmc_primates_tmp.Rev
 echo "mu_0.setValue( 0.1 )" >> mcmc_primates_tmp.Rev
 
 echo "lambda_0 ~ dnUniform(0, 10)" >> mcmc_primates_tmp.Rev
@@ -40,7 +40,6 @@ echo "delay_0.setValue( 1 )" >> mcmc_primates_tmp.Rev
 
 for i in $p
 do
-	#echo "mu$i := mu_0 * exp( - ($i-1) / (25*lambda_0) )" >> mcmc_primates_tmp.Rev
 	echo "mu$i := mu_0 / (1 + exp(lambda_0 * ($i - delay_0) ) )" >> mcmc_primates_tmp.Rev
 done
 
@@ -62,11 +61,7 @@ echo "phylogeny <- readTrees(\"primatesx100.tre\")[1]" >> mcmc_primates_tmp.Rev
 echo "phyMorpho ~ dnPhyloCTMC(tree=phylogeny, Q=Q, type=\"Standard\")" >> mcmc_primates_tmp.Rev
 echo "phyMorpho.clamp(morpho)" >> mcmc_primates_tmp.Rev
 echo "mymodel = model(phylogeny)" >> mcmc_primates_tmp.Rev
-#echo "monitors.append( mnModel(filename=\"output$mod/mk.log\", printgen=1) )" >> mcmc_primates_tmp.Rev
-#echo "monitors.append( mnScreen(printgen=100) )" >> mcmc_primates_tmp.Rev
-#echo "mymcmc = mcmc(mymodel, monitors, moves, nruns=1, combine=\"mixed\")" >> mcmc_primates_tmp.Rev
-#echo "mymcmc.run(generations=5000, tuningInterval=200)" >> mcmc_primates_tmp.Rev
-#echo "mymcmc.operatorSummary()" >> mcmc_primates_tmp.Rev
+
 echo "pow_p = powerPosterior(mymodel, moves, monitors, \"output_sig_cat_$calls/mk_$calls.$mod.ss\", cats=49)" >> mcmc_primates_tmp.Rev
 echo "pow_p.burnin(generations=10000,tuningInterval=1000)" >> mcmc_primates_tmp.Rev
 echo "pow_p.run(generations=1000)" >> mcmc_primates_tmp.Rev

@@ -37,7 +37,6 @@ echo "delay_0.setValue( 1 )" >> mcmc_primates_tmp.Rev
 
 for i in $p
 do
-	#echo "mu$i := mu_0 * exp( - ($i-1) / (25*lambda_0) )" >> mcmc_primates_tmp.Rev
 	echo "mu$i := mu_0 / (1 + exp(lambda_0 * ($i - delay_0) ) )" >> mcmc_primates_tmp.Rev
 done
 
@@ -60,8 +59,8 @@ echo "phyMorpho.clamp(morpho)" >> mcmc_primates_tmp.Rev
 echo "mymodel = model(phylogeny)" >> mcmc_primates_tmp.Rev
 
 echo "pow_p = powerPosterior(mymodel, moves, monitors, \"output_sig_$calls/mk_$calls.$mod.ss\", cats=49)" >> mcmc_primates_tmp.Rev
-echo "pow_p.burnin(generations=100,tuningInterval=100)" >> mcmc_primates_tmp.Rev
-echo "pow_p.run(generations=500)" >> mcmc_primates_tmp.Rev
+echo "pow_p.burnin(generations=10000,tuningInterval=100)" >> mcmc_primates_tmp.Rev
+echo "pow_p.run(generations=1000)" >> mcmc_primates_tmp.Rev
 echo "ss = steppingStoneSampler(file=\"output_sig_$calls/mk_$calls.$mod.ss\", powerColumnName=\"power\", likelihoodColumnName=\"likelihood\")" >> mcmc_primates_tmp.Rev 
 echo "ss_res = ss.marginal()" >> mcmc_primates_tmp.Rev
 echo "write(ss_res, filename = \"ss_res_$calls\")" >> mcmc_primates_tmp.Rev

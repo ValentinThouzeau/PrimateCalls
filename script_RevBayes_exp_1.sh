@@ -26,7 +26,7 @@ echo 'moves    = VectorMoves()' >> mcmc_primates_tmp.Rev
 
 for i in $p
 do
-	echo "mu$i ~ dnExponential( 10 )" >> mcmc_primates_tmp.Rev
+	echo "mu$i ~ dnExponential( 10.0 )" >> mcmc_primates_tmp.Rev
     echo "mu$i.setValue( 0.1 )" >> mcmc_primates_tmp.Rev
 done
 
