@@ -1,5 +1,11 @@
 # Supplementary material of the article entitled "The Emergence of Primate Calls"
 
+Details of the methods :
+- PNAS_thouzeau_SI.pdf
+
+Coding scheme :
+- Table_S1.pdf
+
 Data :
 - primate_alarm.csv
 - primate_food.csv
