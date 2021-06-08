@@ -4,19 +4,19 @@ Begin data;
 Dimensions ntax=14 nchar=1;
 Format datatype=Standard symbols="0123456789abcdefghijklmnopqrstuv" missing=? gap=-;
 Matrix
-Macaca_mulatta g
-Macaca_sylvanus	8
-Theropithecus_gelada	8
-Cercocebus_torquatus_atys	m
-Mandrillus_sphinx	8
-Cercopithecus_mitis_stuhlmanni	r
+Macaca_mulatta	8
+Cercopithecus_mitis_stuhlmanni	v
 Cercopithecus_neglectus	o
-Pan_troglodytes_verus	c
-Pan_paniscus	9
+Lagothrix_lagotricha	8
+Callithrix_jacchus	v
+Macaca_sylvanus	8
 Gorilla_gorilla	c
-Callithrix_jacchus	e
 Cebus_capucinus	o
-Lagothrix_lagotricha	7
+Pan_paniscus	9
+Pan_troglodytes_verus	c
+Cercocebus_torquatus_atys	u
+Theropithecus_gelada	8
+Mandrillus_sphinx	8
 Lemur_catta	n
 ;
 End;
