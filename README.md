@@ -15,7 +15,7 @@ Semantic trees :
 - semantic_alarm.tre
 - semantic_food.tre
 - semantic_non_disturb.tre
-- 
+
 Marginal likelihood estimation script example :
 - script_RevBayes_MarginalEstimation_template.sh
 
