@@ -16,8 +16,8 @@ Semantic trees :
 - semantic_food.tre
 - semantic_non_disturb.tre
 - 
-Marginal likelihood estimation scripts :
-- script_RevBayes_MarginalEstimation_exp_1.sh
+Marginal likelihood estimation script example :
+- script_RevBayes_MarginalEstimation_template.sh
 
-Q matrix construction script :
-- script_write_matrix_exp_1.R
+Q matrix construction script example :
+- script_write_matrix_teamplate.R
