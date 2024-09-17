@@ -1,0 +1,22 @@
+#NEXUS
+
+Begin data;
+Dimensions ntax=14 nchar=5;
+Format datatype=Standard symbols="01" missing=? gap=-;
+Matrix
+Macaca_mulatta	00000
+Cercopithecus_mitis_stuhlmanni	10000
+Cercopithecus_neglectus	00000
+Lagothrix_lagotricha	00000
+Callithrix_jacchus	00100
+Macaca_sylvanus	10100
+Gorilla_gorilla	00100
+Cebus_capucinus	00100
+Pan_paniscus	00000
+Pan_troglodytes_verus	00011
+Cercocebus_torquatus_atys	00000
+Theropithecus_gelada	00000
+Mandrillus_sphinx	00000
+Lemur_catta	01000
+;
+End;
